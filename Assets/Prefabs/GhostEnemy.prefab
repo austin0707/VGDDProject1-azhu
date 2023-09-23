@@ -4858,6 +4858,8 @@ MonoBehaviour:
   m_HealthPill: {fileID: 1227214375016680046, guid: df5e2272459d8e44aa816b3ef08a2255,
     type: 3}
   m_Score: 2
+  m_MovementType: 1
+  m_AttackType: 1
 --- !u!54 &-2836435347173273264
 Rigidbody:
   m_ObjectHideFlags: 0

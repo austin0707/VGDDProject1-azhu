@@ -14,6 +14,11 @@ public class EnemyController : MonoBehaviour
     private float m_Speed;
 
     [SerializeField]
+    [Tooltip("How fast the enemy accelerates")]
+    private float m_Acceleration;
+
+
+    [SerializeField]
     [Tooltip("Approximate amount of damage per frame")]
     private float m_Damage;
 
@@ -32,10 +37,33 @@ public class EnemyController : MonoBehaviour
     [SerializeField]
     [Tooltip("How many points killing this enemy provides")]
     private int m_Score;
+
+    [SerializeField]
+    [Tooltip("The type of movement algorithm the enemy follows")]
+    private int m_MovementType;
+
+    [SerializeField]
+    [Tooltip("Cooldown time for movements")]
+    private int m_MovementCooldownTime;
+
+    [SerializeField]
+    [Tooltip("The type of attack pattern of the enemy")]
+    private int m_AttackType;
+
+    [SerializeField]
+    [Tooltip("Cooldown time of attacks")]
+    private int m_AttackCooldownTime;
+
+    [SerializeField]
+    [Tooltip("Attack Game Object")]
+    private GameObject m_AttackGO;
     #endregion
 
     #region Private Variables
     private float p_curHealth;
+    private float p_movementTimer;
+    private float p_attackTimer;
+    private Color p_DefaultColor;
     #endregion
 
     #region Cached Components
@@ -44,14 +72,20 @@ public class EnemyController : MonoBehaviour
 
     #region Cached References
     private Transform cr_Player;
+    private Renderer cr_Renderer;
     #endregion
 
     #region Initialization
     private void Awake()
     {
         p_curHealth = m_MaxHealth;
+        p_movementTimer = 0;
+        p_attackTimer = 0;
 
         cc_Rb = GetComponent<Rigidbody>();
+        cr_Renderer = GetComponentInChildren<Renderer>();
+        p_DefaultColor = cr_Renderer.material.color;
+
     }
     private void Start()
     {
@@ -62,9 +96,61 @@ public class EnemyController : MonoBehaviour
     #region Main Updates
     private void FixedUpdate()
     {
-        Vector3 dir = cr_Player.position - transform.position;
-        dir.Normalize();
-        cc_Rb.MovePosition(cc_Rb.position + dir * m_Speed * Time.fixedDeltaTime);
+        if (m_MovementType == 1)
+        {
+            Vector3 dir = cr_Player.position - transform.position;
+            dir.Normalize();
+            cc_Rb.MovePosition(cc_Rb.position + dir * m_Speed * Time.fixedDeltaTime);
+        } else if (m_MovementType == 2)
+        {
+            if (p_movementTimer < 0)
+            {
+                if (transform.position.y < 2)
+                {
+                    Vector3 dir = cr_Player.position - transform.position;
+                    dir.Normalize();
+                    dir += new Vector3(0, 3, 0);
+                    cc_Rb.AddForce(dir * m_Acceleration);
+                }
+                else
+                {
+                    p_movementTimer = m_MovementCooldownTime;
+                }
+            } else
+            {
+                p_movementTimer -= Time.fixedDeltaTime;
+                Vector3 dir = cr_Player.position - transform.position;
+                dir.Normalize();
+                cc_Rb.AddForce(dir * m_Speed);
+            }
+            
+        }
+
+        if (m_AttackType == 2)
+        {
+            if (p_attackTimer < 0)
+            {
+                GameObject go = Instantiate(m_AttackGO, transform.position, cc_Rb.rotation);
+                go.GetComponent<Ability>().Use(transform.position);
+                cr_Renderer.material.color = p_DefaultColor;
+
+                p_attackTimer = m_AttackCooldownTime;
+            } else
+            {
+                if (p_attackTimer > 1)
+                {
+                    Vector3 targetPosition = new Vector3(cr_Player.position.x,
+                                       this.transform.position.y,
+                                       cr_Player.position.z);
+                    this.transform.LookAt(targetPosition);
+                } else
+                {
+                    cr_Renderer.material.color = new Color(255, 0, 0);
+                }
+                p_attackTimer -= Time.fixedDeltaTime;
+            }
+        }
+        
     }
     #endregion
 

@@ -48,7 +48,7 @@ public class EnemySpawner : MonoBehaviour
 
             Vector3 spawnPos = new Vector3(
                 Random.Range(-xVal, xVal),
-                Random.Range(-yVal, yVal),
+                Random.Range(0, yVal),
                 Random.Range(-zVal, zVal));
 
             spawnPos += transform.position;

@@ -27,5 +27,16 @@ public class AbilityInfo
             return m_Range;
         }
     }
+
+    [SerializeField]
+    [Tooltip("If this is a player or enemy attack")]
+    private bool m_IsPlayer;
+    public bool IsPlayer
+    {
+        get
+        {
+            return m_IsPlayer;
+        }
+    }
     #endregion
 }

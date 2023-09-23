@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7211711136391825653}
   - component: {fileID: -4954693778633244722}
   m_Layer: 12
-  m_Name: Laser
+  m_Name: TurretLaser
   m_TagString: AttackAbility
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4926,8 +4926,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Info:
     m_Power: 5
-    m_Range: 10
-    m_IsPlayer: 1
+    m_Range: 500
+    m_IsPlayer: 0
 --- !u!114 &-4954693778633244722
 MonoBehaviour:
   m_ObjectHideFlags: 0

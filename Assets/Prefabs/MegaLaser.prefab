@@ -4927,6 +4927,7 @@ MonoBehaviour:
   m_Info:
     m_Power: 10
     m_Range: 25
+    m_IsPlayer: 1
 --- !u!114 &-180010958893645949
 MonoBehaviour:
   m_ObjectHideFlags: 0

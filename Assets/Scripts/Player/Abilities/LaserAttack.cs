@@ -11,9 +11,19 @@ public class LaserAttack : Ability
         if (Physics.SphereCast(spawnPos, 0.5f, transform.forward, out hit, m_Info.Range))
         {
             newLength = (hit.point - spawnPos).magnitude;
-            if (hit.collider.CompareTag("Enemy"))
+            if (m_Info.IsPlayer)
             {
-                hit.collider.GetComponent<EnemyController>().DecreaseHealth(m_Info.Power);
+                if (hit.collider.CompareTag("Enemy"))
+                {
+                    hit.collider.GetComponent<EnemyController>().DecreaseHealth(m_Info.Power);
+                }
+            }
+            else
+            {
+                if (hit.collider.CompareTag("Player"))
+                {
+                    hit.collider.GetComponent<PlayerController>().DecreaseHealth(m_Info.Power);
+                }
             }
         }
         var emitterShape = cc_PS.shape;

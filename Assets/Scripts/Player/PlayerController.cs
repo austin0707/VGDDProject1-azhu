@@ -48,6 +48,9 @@ public class PlayerController : MonoBehaviour
 
     // Current amount of health that the player has
     private float p_CurHealth;
+
+    private int p_SpeedBoost;
+    private float p_SpeedTimer;
     #endregion
 
     #region Initialization
@@ -61,6 +64,8 @@ public class PlayerController : MonoBehaviour
 
         p_FrozenTimer = 0;
         p_CurHealth = m_MaxHealth;
+        p_SpeedBoost = 1;
+        p_SpeedTimer = 0;
 
         for (int i = 0; i < m_Attacks.Length; i++)
         {
@@ -91,6 +96,15 @@ public class PlayerController : MonoBehaviour
         } else
         {
             p_FrozenTimer = 0;
+        }
+
+        if (p_SpeedTimer <= 0)
+        {
+            p_SpeedBoost = 1;
+            p_SpeedTimer = 0;
+        } else
+        {
+            p_SpeedTimer -= Time.deltaTime;
         }
 
         //Ability Use
@@ -143,7 +157,8 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         //Update the position of the player
-        cc_Rb.MovePosition(cc_Rb.position + m_Speed * Time.fixedDeltaTime * transform.forward * p_Velocity.magnitude);
+        float adj_Speed = m_Speed * p_SpeedBoost;
+        cc_Rb.MovePosition(cc_Rb.position + adj_Speed * Time.fixedDeltaTime * transform.forward * p_Velocity.magnitude);
 
         //Update the rotation of the player
         cc_Rb.angularVelocity = Vector3.zero;
@@ -191,9 +206,24 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(toColor);
         yield return new WaitForSeconds(attack.WindUpTime);
 
-        Vector3 offset = transform.forward * attack.Offset.z + transform.right * attack.Offset.x + transform.up * attack.Offset.y;
-        GameObject go = Instantiate(attack.AbilityGO, transform.position + offset, cc_Rb.rotation);
-        go.GetComponent<Ability>().Use(transform.position + offset);
+        if (attack.AttackName == "RingOfFire")
+        {
+            StartCoroutine(Jump());
+            if (transform.position.y > 2)
+            {
+                StopCoroutine(Jump());
+            } else if (transform.position.y < 0.1)
+            {
+                Vector3 offset = transform.forward * attack.Offset.z + transform.right * attack.Offset.x + transform.up * attack.Offset.y;
+                GameObject go = Instantiate(attack.AbilityGO, transform.position + offset, cc_Rb.rotation);
+                go.GetComponent<Ability>().Use(transform.position + offset);
+            }
+        } else
+        {
+            Vector3 offset = transform.forward * attack.Offset.z + transform.right * attack.Offset.x + transform.up * attack.Offset.y;
+            GameObject go = Instantiate(attack.AbilityGO, transform.position + offset, cc_Rb.rotation);
+            go.GetComponent<Ability>().Use(transform.position + offset);
+        }
 
         StopCoroutine(toColor);
         StartCoroutine(ChangeColor(p_DefaultColor, 50));
@@ -214,6 +244,15 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
     }
+
+    private IEnumerator Jump()
+    {
+        while (transform.position.y < 2)
+        {
+            cc_Rb.AddForce(new Vector3(0, 50, 0));
+            yield return null;
+        }
+    }
     #endregion
 
     #region Collision Methods
@@ -222,6 +261,11 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("HealthPill"))
         {
             IncreaseHealth(other.GetComponent<HealthPill>().HealthGain);
+            Destroy(other.gameObject);
+        } else if (other.CompareTag("SpeedPill"))
+        {
+            p_SpeedBoost = other.GetComponent<SpeedPill>().SpeedGain;
+            p_SpeedTimer = other.GetComponent<SpeedPill>().EffectLength;
             Destroy(other.gameObject);
         }
     }
